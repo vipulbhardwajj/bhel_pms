@@ -1,0 +1,12 @@
+{% macro status_badge(status, badge_class='secondary') %}
+<span class="badge bg-{{ badge_class }}">{{ status }}</span>
+{% endmacro %}
+
+{% macro progress_bar(value, css_class='bg-install') %}
+<div class="d-flex align-items-center gap-2">
+  <div class="progress progress-thin flex-grow-1">
+    <div class="progress-bar {{ css_class }}" role="progressbar" style="width: {{ value or 0 }}%;"></div>
+  </div>
+  <span class="small text-muted-light" style="min-width: 34px;">{{ '%.0f'|format(value or 0) }}%</span>
+</div>
+{% endmacro %}

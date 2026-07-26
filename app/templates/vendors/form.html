@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>{{ title }}</h1><div class="breadcrumb-wrap"><a href="{{ url_for('vendors.list_vendors') }}">Vendor Master</a> / {{ title }}</div></div>
+</div>
+<div class="card">
+  <div class="card-body">
+    <form method="POST" novalidate>
+      {{ form.hidden_tag() }}
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Vendor Code</label>
+          {{ form.vendor_code(class="form-control") }}
+        </div>
+        <div class="col-md-8">
+          <label class="form-label">Vendor Name</label>
+          {{ form.name(class="form-control") }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Contact Person</label>
+          {{ form.contact_person(class="form-control") }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Specialization</label>
+          {{ form.specialization(class="form-control") }}
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Email</label>
+          {{ form.email(class="form-control") }}
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Phone</label>
+          {{ form.phone(class="form-control") }}
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">GST Number</label>
+          {{ form.gst_number(class="form-control") }}
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Rating (0-5)</label>
+          {{ form.rating(class="form-control") }}
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+          <div class="form-check">
+            {{ form.is_active(class="form-check-input") }}
+            <label class="form-check-label">Active Vendor</label>
+          </div>
+        </div>
+        <div class="col-md-12">
+          <label class="form-label">Address</label>
+          {{ form.address(class="form-control", rows="2") }}
+        </div>
+      </div>
+      <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn text-white" style="background-color: var(--bhel-navy-700);"><i class="bi bi-check-lg me-1"></i>Save Vendor</button>
+        <a href="{{ url_for('vendors.list_vendors') }}" class="btn btn-outline-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

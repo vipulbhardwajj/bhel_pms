@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "partials/pagination.html" import render_pagination %}
+{% block title %}Daily Progress{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>Daily Progress</h1><div class="breadcrumb-wrap">Site engineer day-wise progress logs</div></div>
+  {% if current_user.can_edit() %}
+  <a href="{{ url_for('progress.create_daily') }}" class="btn btn-sm text-white" style="background-color: var(--bhel-navy-700);"><i class="bi bi-plus-lg me-1"></i>Log Progress</a>
+  {% endif %}
+</div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead><tr><th>Date</th><th>Equipment</th><th>Install %</th><th>Commission %</th><th>Manpower</th><th>Logged By</th><th>Activity</th></tr></thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td>{{ log.log_date | format_date }}</td>
+          <td><a href="{{ url_for('equipment.detail', equipment_id=log.equipment_id) }}">{{ log.equipment.equipment_code }}</a></td>
+          <td>{{ log.installation_progress }}%</td>
+          <td>{{ log.commissioning_progress }}%</td>
+          <td>{{ log.manpower_deployed or '-' }}</td>
+          <td class="small">{{ log.logged_by.full_name if log.logged_by else '-' }}</td>
+          <td class="small text-muted">{{ log.activity_description or '-' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="text-center text-muted py-4">No daily progress logs found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card-body">{{ render_pagination(pagination, 'progress.list_daily') }}</div>
+</div>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import progress_bar %}
+{% block title %}{{ equipment.equipment_code }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ equipment.equipment_name }}</h1>
+    <div class="breadcrumb-wrap"><a href="{{ url_for('equipment.list_equipment') }}">Equipment Master</a> / {{ equipment.equipment_code }}</div>
+  </div>
+  {% if current_user.can_edit() %}
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('equipment.edit_equipment', equipment_id=equipment.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil me-1"></i>Edit</a>
+    <form method="POST" action="{{ url_for('equipment.delete_equipment', equipment_id=equipment.id) }}" onsubmit="return confirmDelete();" class="d-inline">
+      <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash me-1"></i>Delete</button>
+    </form>
+  </div>
+  {% endif %}
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-header">Equipment Details</div>
+      <div class="card-body">
+        <table class="table table-sm mb-0">
+          <tr><th style="width:200px;">Equipment Code</th><td>{{ equipment.equipment_code }}</td><th style="width:180px;">Status</th><td><span class="badge bg-{{ equipment.badge_class }}">{{ equipment.status }}</span></td></tr>
+          <tr><th>System</th><td>{{ equipment.system.system_code }} - {{ equipment.system.name }}</td><th>Category</th><td>{{ equipment.category.name if equipment.category else '-' }}</td></tr>
+          <tr><th>Vendor</th><td>{{ equipment.vendor.name if equipment.vendor else '-' }}</td><th>Assigned Engineer</th><td>{{ equipment.assigned_engineer.full_name if equipment.assigned_engineer else '-' }}</td></tr>
+          <tr><th>Drawing Number</th><td>{{ equipment.drawing_number or '-' }}</td><th>PO Number</th><td>{{ equipment.po_number or '-' }}</td></tr>
+          <tr><th>Expected Date</th><td class="{{ 'text-danger fw-semibold' if equipment.is_overdue }}">{{ equipment.expected_date | format_date }}</td><th>Actual Date</th><td>{{ equipment.actual_date | format_date }}</td></tr>
+        </table>
+        {% if equipment.remarks %}<p class="text-muted small mt-3 mb-0"><strong>Remarks:</strong> {{ equipment.remarks }}</p>{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header">Progress</div>
+      <div class="card-body">
+        <div class="mb-3">
+          <div class="small text-muted mb-1">Installation</div>
+          {{ progress_bar(equipment.installation_progress, 'bg-install') }}
+        </div>
+        <div>
+          <div class="small text-muted mb-1">Commissioning</div>
+          {{ progress_bar(equipment.commissioning_progress, 'bg-commission') }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ul class="nav nav-tabs" id="attachmentTabs" role="tablist">
+  <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#photos-tab">Photos ({{ equipment.photos.count() }})</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#documents-tab">Documents ({{ equipment.documents.count() }})</button></li>
+  <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#drawings-tab">Drawings ({{ equipment.drawings.count() }})</button></li>
+</ul>
+<div class="tab-content border border-top-0 p-3 bg-white mb-4">
+
+  <!-- Photos -->
+  <div class="tab-pane fade show active" id="photos-tab">
+    {% if current_user.can_edit() %}
+    <form method="POST" action="{{ url_for('equipment.upload_photo', equipment_id=equipment.id) }}" enctype="multipart/form-data" class="row g-2 mb-3">
+      {{ photo_form.hidden_tag() }}
+      <div class="col-md-5">{{ photo_form.photo(class="form-control form-control-sm") }}</div>
+      <div class="col-md-5">{{ photo_form.caption(class="form-control form-control-sm", placeholder="Caption") }}</div>
+      <div class="col-md-2"><button class="btn btn-sm btn-outline-secondary w-100">Upload</button></div>
+    </form>
+    {% endif %}
+    <div class="row g-3">
+      {% for photo in equipment.photos %}
+      <div class="col-md-3">
+        <div class="card">
+          <img src="{{ url_for('equipment.serve_photo', filename=photo.filename) }}" class="card-img-top" style="height:150px; object-fit:cover;">
+          <div class="card-body p-2"><div class="small">{{ photo.caption or photo.original_filename }}</div></div>
+        </div>
+      </div>
+      {% else %}
+      <div class="col-12 text-muted text-center py-4">No photos uploaded yet.</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Documents -->
+  <div class="tab-pane fade" id="documents-tab">
+    {% if current_user.can_edit() %}
+    <form method="POST" action="{{ url_for('equipment.upload_document', equipment_id=equipment.id) }}" enctype="multipart/form-data" class="row g-2 mb-3">
+      {{ document_form.hidden_tag() }}
+      <div class="col-md-5">{{ document_form.document(class="form-control form-control-sm") }}</div>
+      <div class="col-md-5">{{ document_form.document_type(class="form-control form-control-sm", placeholder="Document Type e.g. Test Certificate") }}</div>
+      <div class="col-md-2"><button class="btn btn-sm btn-outline-secondary w-100">Upload</button></div>
+    </form>
+    {% endif %}
+    <table class="table table-sm">
+      <thead><tr><th>File</th><th>Type</th><th>Uploaded By</th><th>Date</th><th></th></tr></thead>
+      <tbody>
+        {% for doc in equipment.documents %}
+        <tr>
+          <td><i class="bi bi-file-earmark-text me-1"></i>{{ doc.original_filename }}</td>
+          <td>{{ doc.document_type or '-' }}</td>
+          <td>{{ doc.uploaded_by.full_name if doc.uploaded_by else '-' }}</td>
+          <td>{{ doc.uploaded_at | format_date }}</td>
+          <td><a href="{{ url_for('equipment.serve_document', filename=doc.filename) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-download"></i></a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="text-center text-muted py-3">No documents uploaded yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Drawings -->
+  <div class="tab-pane fade" id="drawings-tab">
+    {% if current_user.can_edit() %}
+    <form method="POST" action="{{ url_for('equipment.upload_drawing', equipment_id=equipment.id) }}" enctype="multipart/form-data" class="row g-2 mb-3">
+      {{ drawing_form.hidden_tag() }}
+      <div class="col-md-4">{{ drawing_form.drawing(class="form-control form-control-sm") }}</div>
+      <div class="col-md-3">{{ drawing_form.drawing_number(class="form-control form-control-sm", placeholder="Drawing No.") }}</div>
+      <div class="col-md-3">{{ drawing_form.revision(class="form-control form-control-sm", placeholder="Revision") }}</div>
+      <div class="col-md-2"><button class="btn btn-sm btn-outline-secondary w-100">Upload</button></div>
+    </form>
+    {% endif %}
+    <table class="table table-sm">
+      <thead><tr><th>File</th><th>Drawing No.</th><th>Revision</th><th>Date</th><th></th></tr></thead>
+      <tbody>
+        {% for drawing in equipment.drawings %}
+        <tr>
+          <td><i class="bi bi-file-earmark-ruled me-1"></i>{{ drawing.original_filename }}</td>
+          <td>{{ drawing.drawing_number or '-' }}</td>
+          <td>{{ drawing.revision or '-' }}</td>
+          <td>{{ drawing.uploaded_at | format_date }}</td>
+          <td><a href="{{ url_for('equipment.serve_drawing', filename=drawing.filename) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-download"></i></a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="text-center text-muted py-3">No drawings uploaded yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

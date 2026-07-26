@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import progress_bar %}
+{% block title %}Units{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Units</h1>
+    <div class="breadcrumb-wrap">Generating units within each project</div>
+  </div>
+  {% if current_user.can_edit() %}
+  <a href="{{ url_for('units.create_unit') }}" class="btn btn-sm text-white" style="background-color: var(--bhel-navy-700);"><i class="bi bi-plus-lg me-1"></i>New Unit</a>
+  {% endif %}
+</div>
+
+<div class="card mb-3">
+  <div class="card-body py-2">
+    <form method="GET" class="row g-2">
+      <div class="col-md-4">
+        <select name="project_id" class="form-select form-select-sm" onchange="this.form.submit()">
+          <option value="">All Projects</option>
+          {% for p in projects %}
+          <option value="{{ p.id }}" {{ 'selected' if selected_project == p.id }}>{{ p.project_code }} - {{ p.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover data-table align-middle mb-0">
+      <thead><tr><th>Unit Code</th><th>Name</th><th>Project</th><th>Capacity (MW)</th><th>Progress</th><th></th></tr></thead>
+      <tbody>
+        {% for unit in units %}
+        <tr>
+          <td class="fw-semibold">{{ unit.unit_code }}</td>
+          <td>{{ unit.name }}</td>
+          <td><a href="{{ url_for('projects.detail', project_id=unit.project_id) }}">{{ unit.project.project_code }}</a></td>
+          <td>{{ unit.capacity_mw or '-' }}</td>
+          <td style="min-width:140px;">{{ progress_bar(unit.overall_progress) }}</td>
+          <td class="text-end">
+            {% if current_user.can_edit() %}
+            <a href="{{ url_for('units.edit_unit', unit_id=unit.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+            <form method="POST" action="{{ url_for('units.delete_unit', unit_id=unit.id) }}" class="d-inline" onsubmit="return confirmDelete();">
+              <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="text-center text-muted py-4">No units found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

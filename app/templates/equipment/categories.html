@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Equipment Categories{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>Equipment Categories</h1><div class="breadcrumb-wrap">Master classification for equipment (Pump, Valve, Motor, etc.)</div></div>
+  {% if current_user.can_edit() %}
+  <a href="{{ url_for('equipment.create_category') }}" class="btn btn-sm text-white" style="background-color: var(--bhel-navy-700);"><i class="bi bi-plus-lg me-1"></i>New Category</a>
+  {% endif %}
+</div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover data-table align-middle mb-0">
+      <thead><tr><th>Code</th><th>Name</th><th>Description</th><th>Equipment Count</th></tr></thead>
+      <tbody>
+        {% for cat in categories %}
+        <tr>
+          <td class="fw-semibold">{{ cat.code }}</td>
+          <td>{{ cat.name }}</td>
+          <td class="small text-muted">{{ cat.description or '-' }}</td>
+          <td>{{ cat.equipment_items.count() }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="text-center text-muted py-4">No categories defined.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

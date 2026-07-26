@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import progress_bar %}
+{% block title %}{{ project.name }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>{{ project.name }}</h1>
+    <div class="breadcrumb-wrap"><a href="{{ url_for('projects.list_projects') }}">Projects</a> / {{ project.project_code }}</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('projects.export_pdf', project_id=project.id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-file-earmark-pdf me-1"></i>PDF Report</a>
+    {% if current_user.can_edit() %}
+    <a href="{{ url_for('projects.edit_project', project_id=project.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil me-1"></i>Edit</a>
+    <form method="POST" action="{{ url_for('projects.delete_project', project_id=project.id) }}" onsubmit="return confirmDelete('Delete this project and all its data?');" class="d-inline">
+      <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash me-1"></i>Delete</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-header">Project Summary</div>
+      <div class="card-body">
+        <table class="table table-sm mb-0">
+          <tr><th style="width:200px;">Client</th><td>{{ project.client_name or '-' }}</td><th style="width:180px;">Location</th><td>{{ project.location or '-' }}</td></tr>
+          <tr><th>Capacity</th><td>{{ project.capacity_mw or '-' }} MW</td><th>Contract Value</th><td>{{ project.contract_value_crore or '-' }} Crore</td></tr>
+          <tr><th>Start Date</th><td>{{ project.start_date | format_date }}</td><th>Scheduled End</th><td>{{ project.scheduled_end_date | format_date }}</td></tr>
+          <tr><th>Project Manager</th><td>{{ project.project_manager or '-' }}</td><th>Status</th><td><span class="badge bg-{{ 'danger' if project.status == 'Delayed' else 'success' if project.status == 'Completed' else 'warning' if project.status == 'On Hold' else 'info' }}">{{ project.status }}</span></td></tr>
+        </table>
+        {% if project.description %}<p class="text-muted small mt-3 mb-0">{{ project.description }}</p>{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header">Overall Progress</div>
+      <div class="card-body text-center">
+        <canvas class="progress-gauge" data-value="{{ project.overall_progress }}" height="140"></canvas>
+        <div class="fw-bold mt-n2" style="font-size:1.4rem;">{{ project.overall_progress }}%</div>
+        <div class="text-muted small">{{ project.equipment_count }} equipment items tracked</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">Plant Hierarchy</div>
+  <div class="card-body">
+    <div class="accordion" id="hierarchyAccordion">
+      {% for unit in project.units %}
+      <div class="accordion-item mb-2">
+        <h2 class="accordion-header">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#unit{{ unit.id }}">
+            <strong class="me-2">{{ unit.unit_code }}</strong> {{ unit.name }}
+            <span class="ms-auto me-3" style="width: 160px;">{{ progress_bar(unit.overall_progress) }}</span>
+          </button>
+        </h2>
+        <div id="unit{{ unit.id }}" class="accordion-collapse collapse" data-bs-parent="#hierarchyAccordion">
+          <div class="accordion-body">
+            {% for area in unit.areas %}
+            <div class="border rounded p-2 mb-2">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div><strong>{{ area.area_code }}</strong> &mdash; {{ area.name }}</div>
+                <span style="width: 140px;">{{ progress_bar(area.overall_progress) }}</span>
+              </div>
+              {% for system in area.systems %}
+              <div class="ms-3 mb-2 border-start ps-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <div class="small"><strong>{{ system.system_code }}</strong> &mdash; {{ system.name }}</div>
+                  <span style="width: 120px;">{{ progress_bar(system.overall_progress) }}</span>
+                </div>
+                <table class="table table-sm table-borderless mb-0">
+                  {% for eq in system.equipment_items %}
+                  <tr>
+                    <td class="small"><a href="{{ url_for('equipment.detail', equipment_id=eq.id) }}">{{ eq.equipment_code }}</a> - {{ eq.equipment_name }}</td>
+                    <td class="small" style="width:130px;"><span class="badge bg-{{ eq.badge_class }}">{{ eq.status }}</span></td>
+                    <td style="width:140px;">{{ progress_bar(eq.installation_progress) }}</td>
+                  </tr>
+                  {% else %}
+                  <tr><td class="small text-muted">No equipment records under this system.</td></tr>
+                  {% endfor %}
+                </table>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-muted small">No areas defined for this unit.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="text-muted text-center py-4">No units created for this project yet.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>window.dashboardData = { statusDistribution: null, projectProgress: null };</script>
+{% endblock %}

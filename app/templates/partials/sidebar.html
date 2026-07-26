@@ -1,0 +1,77 @@
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand">
+
+    <img
+        src="{{ url_for('static', filename='images/bhellogo.png') }}"
+        alt="BHEL Logo"
+        class="sidebar-logo">
+
+</div>
+    <div class="brand-text">
+      <strong>{{ app_short_name }}</strong>
+      <span>{{ org_name }}</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a href="{{ url_for('dashboard.index') }}" class="nav-link {{ 'active' if request.blueprint == 'dashboard' }}">
+      <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+    </a>
+
+    <div class="sidebar-section-label">Plant Hierarchy</div>
+    <a href="{{ url_for('projects.list_projects') }}" class="nav-link {{ 'active' if request.blueprint == 'projects' }}">
+      <i class="bi bi-diagram-3"></i><span>Projects</span>
+    </a>
+    <a href="{{ url_for('units.list_units') }}" class="nav-link {{ 'active' if request.blueprint == 'units' }}">
+      <i class="bi bi-building"></i><span>Units</span>
+    </a>
+    <a href="{{ url_for('areas.list_areas') }}" class="nav-link {{ 'active' if request.blueprint == 'areas' }}">
+      <i class="bi bi-bounding-box"></i><span>Areas</span>
+    </a>
+    <a href="{{ url_for('systems.list_systems') }}" class="nav-link {{ 'active' if request.blueprint == 'systems' }}">
+      <i class="bi bi-diagram-2"></i><span>Systems</span>
+    </a>
+
+    <div class="sidebar-section-label">Master Data</div>
+    <a href="{{ url_for('equipment.list_equipment') }}" class="nav-link {{ 'active' if request.blueprint == 'equipment' and request.endpoint != 'equipment.list_categories' }}">
+      <i class="bi bi-gear-wide-connected"></i><span>Equipment Master</span>
+    </a>
+    <a href="{{ url_for('equipment.list_categories') }}" class="nav-link {{ 'active' if request.endpoint == 'equipment.list_categories' }}">
+      <i class="bi bi-tags"></i><span>Equipment Categories</span>
+    </a>
+    <a href="{{ url_for('vendors.list_vendors') }}" class="nav-link {{ 'active' if request.blueprint == 'vendors' }}">
+      <i class="bi bi-truck"></i><span>Vendor Master</span>
+    </a>
+
+    <div class="sidebar-section-label">Progress Tracking</div>
+    <a href="{{ url_for('progress.list_daily') }}" class="nav-link {{ 'active' if request.endpoint and 'daily' in request.endpoint }}">
+      <i class="bi bi-calendar-day"></i><span>Daily Progress</span>
+    </a>
+    <a href="{{ url_for('progress.list_weekly') }}" class="nav-link {{ 'active' if request.endpoint and 'weekly' in request.endpoint }}">
+      <i class="bi bi-calendar-week"></i><span>Weekly Progress</span>
+    </a>
+    <a href="{{ url_for('progress.list_monthly') }}" class="nav-link {{ 'active' if request.endpoint and 'monthly' in request.endpoint }}">
+      <i class="bi bi-calendar-month"></i><span>Monthly Progress</span>
+    </a>
+
+    <div class="sidebar-section-label">Reporting</div>
+    <a href="{{ url_for('reports.index') }}" class="nav-link {{ 'active' if request.blueprint == 'reports' }}">
+      <i class="bi bi-file-earmark-text"></i><span>Reports</span>
+    </a>
+    <a href="{{ url_for('equipment.import_excel') }}" class="nav-link {{ 'active' if request.endpoint == 'equipment.import_excel' }}">
+      <i class="bi bi-file-earmark-spreadsheet"></i><span>Excel Import</span>
+    </a>
+
+    {% if current_user.is_authenticated and current_user.is_admin %}
+    <div class="sidebar-section-label">Administration</div>
+    <a href="{{ url_for('admin.list_users') }}" class="nav-link {{ 'active' if request.endpoint == 'admin.list_users' or request.endpoint == 'admin.create_user' or request.endpoint == 'admin.edit_user' }}">
+      <i class="bi bi-people"></i><span>User Management</span>
+    </a>
+    {% endif %}
+  </nav>
+
+  <div class="sidebar-footer">
+    &copy; {{ current_year }} {{ org_name }}<br>v1.0.0 Production
+  </div>
+</aside>

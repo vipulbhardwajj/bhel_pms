@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from "partials/pagination.html" import render_pagination %}
+{% block title %}Weekly Progress{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>Weekly Progress</h1><div class="breadcrumb-wrap">Planned vs actual weekly progress summaries</div></div>
+  {% if current_user.can_edit() %}
+  <a href="{{ url_for('progress.create_weekly') }}" class="btn btn-sm text-white" style="background-color: var(--bhel-navy-700);"><i class="bi bi-plus-lg me-1"></i>Log Progress</a>
+  {% endif %}
+</div>
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead><tr><th>Week</th><th>Equipment</th><th>Planned %</th><th>Actual %</th><th>Variance</th><th>Logged By</th></tr></thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td class="small">{{ log.week_start_date | format_date }} &mdash; {{ log.week_end_date | format_date }}</td>
+          <td><a href="{{ url_for('equipment.detail', equipment_id=log.equipment_id) }}">{{ log.equipment.equipment_code }}</a></td>
+          <td>{{ log.planned_progress }}%</td>
+          <td>{{ log.actual_progress }}%</td>
+          <td class="{{ 'text-danger' if log.variance < 0 else 'text-success' }}">{{ log.variance }}%</td>
+          <td class="small">{{ log.logged_by.full_name if log.logged_by else '-' }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="text-center text-muted py-4">No weekly progress logs found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card-body">{{ render_pagination(pagination, 'progress.list_weekly') }}</div>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}My Profile{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>My Profile</h1>
+    <div class="breadcrumb-wrap">Account details and role permissions</div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-lg-4 mb-3">
+    <div class="card text-center p-4">
+      <div class="avatar mx-auto mb-3" style="width:72px;height:72px;font-size:1.6rem;">{{ current_user.full_name[:1] }}</div>
+      <h5 class="mb-0">{{ current_user.full_name }}</h5>
+      <div class="text-muted small mb-2">{{ current_user.designation or '-' }}</div>
+      <span class="badge bg-primary">{{ current_user.role }}</span>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-body">
+        <table class="table table-sm mb-0">
+          <tr><th style="width: 220px;">Employee Code</th><td>{{ current_user.employee_code }}</td></tr>
+          <tr><th>Username</th><td>{{ current_user.username }}</td></tr>
+          <tr><th>Email</th><td>{{ current_user.email }}</td></tr>
+          <tr><th>Department</th><td>{{ current_user.department or '-' }}</td></tr>
+          <tr><th>Phone</th><td>{{ current_user.phone or '-' }}</td></tr>
+          <tr><th>Role</th><td>{{ current_user.role }}</td></tr>
+          <tr><th>Last Login</th><td>{{ current_user.last_login_at | format_datetime }}</td></tr>
+          <tr><th>Account Created</th><td>{{ current_user.created_at | format_date }}</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

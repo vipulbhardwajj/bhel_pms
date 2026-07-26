@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import progress_bar %}
+{% from "partials/pagination.html" import render_pagination %}
+{% block title %}Projects{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Projects</h1>
+    <div class="breadcrumb-wrap">Top level EPC / power plant projects executed by BHEL</div>
+  </div>
+  {% if current_user.can_edit() %}
+  <a href="{{ url_for('projects.create_project') }}" class="btn btn-sm text-white" style="background-color: var(--bhel-navy-700);"><i class="bi bi-plus-lg me-1"></i>New Project</a>
+  {% endif %}
+</div>
+
+<div class="card mb-3">
+  <div class="card-body py-2">
+    <form method="GET" class="row g-2 align-items-center">
+      <div class="col-md-5">
+        <input type="text" name="q" value="{{ search }}" class="form-control form-control-sm" placeholder="Search by name, code or client...">
+      </div>
+      <div class="col-md-3">
+        <select name="status" class="form-select form-select-sm">
+          <option value="">All Statuses</option>
+          {% for s in statuses %}
+          <option value="{{ s }}" {{ 'selected' if status_filter == s }}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-sm btn-outline-secondary w-100" type="submit"><i class="bi bi-search me-1"></i>Filter</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Project Code</th><th>Name</th><th>Client</th><th>Capacity (MW)</th>
+          <th>Status</th><th>Progress</th><th>Scheduled End</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for project in projects %}
+        <tr>
+          <td><a href="{{ url_for('projects.detail', project_id=project.id) }}" class="fw-semibold">{{ project.project_code }}</a></td>
+          <td>{{ project.name }}</td>
+          <td>{{ project.client_name or '-' }}</td>
+          <td>{{ project.capacity_mw or '-' }}</td>
+          <td><span class="badge bg-{{ 'danger' if project.status == 'Delayed' else 'success' if project.status == 'Completed' else 'warning' if project.status == 'On Hold' else 'info' }}">{{ project.status }}</span></td>
+          <td style="min-width: 140px;">{{ progress_bar(project.overall_progress) }}</td>
+          <td>{{ project.scheduled_end_date | format_date }}</td>
+          <td class="text-end">
+            <a href="{{ url_for('projects.detail', project_id=project.id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></a>
+            {% if current_user.can_edit() %}
+            <a href="{{ url_for('projects.edit_project', project_id=project.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="text-center text-muted py-4">No projects found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card-body">
+    {{ render_pagination(pagination, 'projects.list_projects', {'q': search, 'status': status_filter}) }}
+  </div>
+</div>
+{% endblock %}

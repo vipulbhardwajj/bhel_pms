@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import progress_bar %}
+{% from "partials/pagination.html" import render_pagination %}
+{% block title %}Equipment Master{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Equipment Master</h1>
+    <div class="breadcrumb-wrap">Leaf-level equipment records with installation & commissioning tracking</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{{ url_for('equipment.export_excel') }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-file-earmark-excel me-1"></i>Export Excel</a>
+    <a href="{{ url_for('equipment.import_excel') }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-upload me-1"></i>Import Excel</a>
+    {% if current_user.can_edit() %}
+    <a href="{{ url_for('equipment.create_equipment') }}" class="btn btn-sm text-white" style="background-color: var(--bhel-navy-700);"><i class="bi bi-plus-lg me-1"></i>New Equipment</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body py-2">
+    <form method="GET" class="row g-2 align-items-center">
+      <div class="col-md-4">
+        <input type="text" name="q" value="{{ search }}" class="form-control form-control-sm" placeholder="Search by name or code...">
+      </div>
+      <div class="col-md-3">
+        <select name="status" class="form-select form-select-sm">
+          <option value="">All Statuses</option>
+          {% for s in statuses %}
+          <option value="{{ s }}" {{ 'selected' if status_filter == s }}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select name="system_id" class="form-select form-select-sm">
+          <option value="">All Systems</option>
+          {% for s in systems %}
+          <option value="{{ s.id }}" {{ 'selected' if system_filter == s.id }}>{{ s.system_code }} - {{ s.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-sm btn-outline-secondary w-100" type="submit"><i class="bi bi-search me-1"></i>Filter</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Code</th><th>Name</th><th>System</th><th>Vendor</th><th>Status</th>
+          <th>Install %</th><th>Commission %</th><th>Engineer</th><th>Expected Date</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for eq in equipment_items %}
+        <tr class="{{ 'table-danger' if eq.is_overdue }}">
+          <td><a href="{{ url_for('equipment.detail', equipment_id=eq.id) }}" class="fw-semibold">{{ eq.equipment_code }}</a></td>
+          <td>{{ eq.equipment_name }}</td>
+          <td class="small">{{ eq.system.system_code }}</td>
+          <td class="small">{{ eq.vendor.name if eq.vendor else '-' }}</td>
+          <td><span class="badge bg-{{ eq.badge_class }}">{{ eq.status }}</span></td>
+          <td style="min-width:120px;">{{ progress_bar(eq.installation_progress, 'bg-install') }}</td>
+          <td style="min-width:120px;">{{ progress_bar(eq.commissioning_progress, 'bg-commission') }}</td>
+          <td class="small">{{ eq.assigned_engineer.full_name if eq.assigned_engineer else '-' }}</td>
+          <td class="small {{ 'text-danger fw-semibold' if eq.is_overdue }}">{{ eq.expected_date | format_date }}</td>
+          <td class="text-end">
+            <a href="{{ url_for('equipment.detail', equipment_id=eq.id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></a>
+            {% if current_user.can_edit() %}
+            <a href="{{ url_for('equipment.edit_equipment', equipment_id=eq.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="10" class="text-center text-muted py-4">No equipment records found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card-body">
+    {{ render_pagination(pagination, 'equipment.list_equipment', {'q': search, 'status': status_filter, 'system_id': system_filter}) }}
+  </div>
+</div>
+{% endblock %}

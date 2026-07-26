@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Import Equipment from Excel{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>Excel Import &mdash; Equipment Master</h1><div class="breadcrumb-wrap"><a href="{{ url_for('equipment.list_equipment') }}">Equipment Master</a> / Import</div></div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header">Upload Workbook</div>
+      <div class="card-body">
+        <p class="text-muted small">Upload a .xlsx file matching the required import template. Existing equipment
+          (matched by System Code + Equipment Code) will be updated; new rows will be created.</p>
+        <form method="POST" enctype="multipart/form-data">
+          <div class="mb-3">
+            <input type="file" name="import_file" accept=".xlsx,.xls" class="form-control" required>
+          </div>
+          <button type="submit" class="btn text-white" style="background-color: var(--bhel-navy-700);"><i class="bi bi-upload me-1"></i>Import</button>
+          <a href="{{ url_for('equipment.import_template') }}" class="btn btn-outline-secondary"><i class="bi bi-download me-1"></i>Download Template</a>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-header">Required Columns</div>
+      <div class="card-body">
+        <ol class="small mb-0">
+          <li>Equipment Code</li>
+          <li>Equipment Name</li>
+          <li>System Code</li>
+          <li>Category Code</li>
+          <li>Vendor Code</li>
+          <li>Drawing Number</li>
+          <li>PO Number</li>
+          <li>Status</li>
+          <li>Installation Progress (%)</li>
+          <li>Commissioning Progress (%)</li>
+          <li>Assigned Engineer Username</li>
+          <li>Expected Date (DD-MMM-YYYY)</li>
+          <li>Actual Date (DD-MMM-YYYY)</li>
+          <li>Remarks</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

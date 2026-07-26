@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Import Results{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>Import Results</h1><div class="breadcrumb-wrap"><a href="{{ url_for('equipment.list_equipment') }}">Equipment Master</a> / Import Results</div></div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-4">
+    <div class="kpi-card" style="--kpi-accent: var(--bhel-green);">
+      <div class="kpi-label">Created</div>
+      <div class="kpi-value">{{ result.created }}</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="kpi-card" style="--kpi-accent: var(--bhel-cyan);">
+      <div class="kpi-label">Updated</div>
+      <div class="kpi-value">{{ result.updated }}</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="kpi-card" style="--kpi-accent: var(--bhel-red);">
+      <div class="kpi-label">Errors</div>
+      <div class="kpi-value">{{ result.errors|length }}</div>
+    </div>
+  </div>
+</div>
+
+{% if result.errors %}
+<div class="card mb-3">
+  <div class="card-header">Row Errors</div>
+  <div class="card-body">
+    <ul class="small mb-0">
+      {% for err in result.errors %}<li class="text-danger">{{ err }}</li>{% endfor %}
+    </ul>
+  </div>
+</div>
+{% endif %}
+
+<a href="{{ url_for('equipment.list_equipment') }}" class="btn text-white" style="background-color: var(--bhel-navy-700);">Go to Equipment Master</a>
+<a href="{{ url_for('equipment.import_excel') }}" class="btn btn-outline-secondary">Import Another File</a>
+{% endblock %}

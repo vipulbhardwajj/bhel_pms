@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div><h1>{{ title }}</h1><div class="breadcrumb-wrap"><a href="{{ url_for('areas.list_areas') }}">Areas</a> / {{ title }}</div></div>
+</div>
+<div class="card">
+  <div class="card-body">
+    <form method="POST" novalidate>
+      {{ form.hidden_tag() }}
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Unit</label>
+          {{ form.unit_id(class="form-select") }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Area Code</label>
+          {{ form.area_code(class="form-control") }}
+        </div>
+        <div class="col-md-12">
+          <label class="form-label">Area Name</label>
+          {{ form.name(class="form-control") }}
+        </div>
+        <div class="col-md-12">
+          <label class="form-label">Description</label>
+          {{ form.description(class="form-control", rows="3") }}
+        </div>
+      </div>
+      <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn text-white" style="background-color: var(--bhel-navy-700);"><i class="bi bi-check-lg me-1"></i>Save Area</button>
+        <a href="{{ url_for('areas.list_areas') }}" class="btn btn-outline-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
