@@ -39,7 +39,13 @@ def _init_extensions(app):
         return User.query.get(int(user_id))
     # Create tables automatically
     with app.app_context():
-        db.create_all()
+    db.create_all()
+
+    from app.models.user import User
+
+    if User.query.count() == 0:
+        from seed import seed
+        seed()
 
 
 def _register_blueprints(app):
