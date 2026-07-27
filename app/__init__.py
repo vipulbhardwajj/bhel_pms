@@ -37,6 +37,9 @@ def _init_extensions(app):
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
+    # Create tables automatically
+    with app.app_context():
+        db.create_all()
 
 
 def _register_blueprints(app):
